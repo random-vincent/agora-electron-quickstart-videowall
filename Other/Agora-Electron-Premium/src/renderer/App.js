@@ -49,7 +49,7 @@ export default class App extends Component {
         width: videoProfileList[0].width / 9,
         height: videoProfileList[0].height / 9
       },
-      subedVideoList:[]
+      // subedVideoList:[]
     }
   }
 
@@ -80,6 +80,33 @@ export default class App extends Component {
   componentDidMount() {
   }
 
+  updateView(oldVideoListLength,newVideoListLength){
+    // const oldVideoListLength = this.state.users.length
+    // const newVideoListLength = this.state.users.length
+    console.log("new old length ====", oldVideoListLength, newVideoListLength);
+    if(oldVideoListLength === newVideoListLength)return;
+    const profile = videoProfileList[this.state.encoderConfiguration];
+    const USER_NUM = 9 - 1;
+    if(newVideoListLength > USER_NUM){
+      console.log("走 >9",profile.width / (newVideoListLength+1));
+      this.setState({
+        windowSize:{
+          width: profile.width / (newVideoListLength+1),
+          height:  profile.height / (USER_NUM+1),
+        }
+      })
+    }
+    if(newVideoListLength <= USER_NUM && oldVideoListLength > USER_NUM){
+      console.log("走 >9 -> <= 9");
+      this.setState({
+        windowSize:{
+          width: profile.width / (USER_NUM + 1),
+          height: profile.height / (USER_NUM + 1)
+        }
+      })
+    }
+  }
+
   subscribeEvents = (rtcEngine) => {
     rtcEngine.on('joinedchannel', (channel, uid, elapsed) => {
       console.log(`onJoinChannel channel: ${channel}  uid: ${uid}  version: ${JSON.stringify(rtcEngine.getVersion())})`)
@@ -95,15 +122,19 @@ export default class App extends Component {
         return
       }
       rtcEngine.muteRemoteVideoStream(uid, false)
+      const oldLength = this.state.users.length
       this.setState({
         users: this.state.users.concat([uid])
       })
+      this.updateView(oldLength, this.state.users.length)
     })
     rtcEngine.on('removestream', (uid, reason) => {
       console.log(`useroffline ${uid}`)
+      const oldLength = this.state.users.length
       this.setState({
         users: this.state.users.filter(u => u != uid)
       })
+      this.updateView(oldLength, this.state.users.length)
     })
     rtcEngine.on('leavechannel', (rtcStats) => {
       console.log(`onleaveChannel----`)
@@ -154,38 +185,6 @@ export default class App extends Component {
     })
     rtcEngine.on("remoteVideoStats",stats=>{
       console.log(`remoteVideoStats: ${JSON.stringify(stats)}`)
-    })
-    rtcEngine.on("videoSubscribeStateChanged",(channel, uid, oldState, newState)=>{
-      const oldVideoListLength = this.state.subedVideoList.length
-      if(newState === 3){
-        this.setState({
-          subedVideoList: [...new Set([...this.state.subedVideoList, uid])]
-        })
-      }else if(newState === 1){
-        this.setState({
-          subedVideoList: this.state.subedVideoList.filter(u => u!= uid)
-        })
-      }
-      const newVideoListLength = this.state.subedVideoList.length
-      if(oldVideoListLength === newVideoListLength)return;
-      const profile = videoProfileList[this.state.encoderConfiguration];
-      const USER_NUM = 9 - 1;
-      if(newVideoListLength > USER_NUM){
-        this.setState({
-          windowSize:{
-            width: profile.width / newVideoListLength,
-            height:  profile.height / (USER_NUM + 1),
-          }
-        })
-      }
-      if(newVideoListLength <= USER_NUM && oldVideoListLength > USER_NUM){
-        this.setState({
-          windowSize:{
-            width: profile.width / (USER_NUM + 1),
-            height: profile.height / (USER_NUM + 1)
-          }
-        })
-      }
     })
   }
 
