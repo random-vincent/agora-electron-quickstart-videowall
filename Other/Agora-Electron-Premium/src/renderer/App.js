@@ -839,7 +839,8 @@ class Window extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      loading: false
+      loading: false,
+      isFullScreen: false
     }
   }
 
@@ -860,6 +861,30 @@ class Window extends Component {
     }
   }
 
+  fullScreenHandler(e){
+    const wrapper = e.currentTarget.parentNode;
+    if(!wrapper){
+      return;
+    }else{
+      wrapper.classList.add("full-screen")
+      this.setState({
+        isFullScreen: true
+      })
+    }
+  }
+
+  exitFullScreenHandler(e){
+    const wrapper = e.currentTarget.parentNode;
+    if(!wrapper){
+      return;
+    }else{
+      wrapper.classList.remove("full-screen")
+      this.setState({
+        isFullScreen: false
+      })
+    }
+  }
+
   render() {
     return (
       <div className="window-item" style={{
@@ -867,7 +892,11 @@ class Window extends Component {
         height: this.props.size.height + "px",
       }}>
         <div className="video-item" id={'video-' + this.props.uid}></div>
-
+        <input type="button" value="Full Screen" onClick={this.fullScreenHandler.bind(this)}/>
+        {this.state.isFullScreen && (
+          <input className="exit-full-screen-button" 
+            type="button" value="Exit Full Screen" onClick={this.exitFullScreenHandler.bind(this)}/>
+        )}
       </div>
     )
   }
