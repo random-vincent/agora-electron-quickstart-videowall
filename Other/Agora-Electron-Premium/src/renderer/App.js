@@ -36,7 +36,7 @@ export default class App extends Component {
       camera: 0,
       mic: 0,
       speaker: 0,
-      encoderConfiguration: 3,
+      encoderConfiguration: 0,
       showWindowPicker: false,
       showDisplayPicker: false,
       recordingTestOn: false,
@@ -44,7 +44,12 @@ export default class App extends Component {
       lastmileTestOn: false,
       rtmpTestOn: false,
       windowList: [],
-      displayList: []
+      displayList: [],
+      windowSize:{
+        width: videoProfileList[0].width / 9,
+        height: videoProfileList[0].height / 9
+      },
+      subedVideoList:[]
     }
   }
 
@@ -147,6 +152,41 @@ export default class App extends Component {
     rtcEngine.on('executefailed', funcName => {
       console.error(funcName, 'failed to execute')
     })
+    rtcEngine.on("remoteVideoStats",stats=>{
+      console.log(`remoteVideoStats: ${JSON.stringify(stats)}`)
+    })
+    rtcEngine.on("videoSubscribeStateChanged",(channel, uid, oldState, newState)=>{
+      const oldVideoListLength = this.state.subedVideoList.length
+      if(newState === 3){
+        this.setState({
+          subedVideoList: [...new Set([...this.state.subedVideoList, uid])]
+        })
+      }else if(newState === 1){
+        this.setState({
+          subedVideoList: this.state.subedVideoList.filter(u => u!= uid)
+        })
+      }
+      const newVideoListLength = this.state.subedVideoList.length
+      if(oldVideoListLength === newVideoListLength)return;
+      const profile = videoProfileList[this.state.encoderConfiguration];
+      const USER_NUM = 9 - 1;
+      if(newVideoListLength > USER_NUM){
+        this.setState({
+          windowSize:{
+            width: profile.width / newVideoListLength,
+            height:  profile.height / (USER_NUM + 1),
+          }
+        })
+      }
+      if(newVideoListLength <= USER_NUM && oldVideoListLength > USER_NUM){
+        this.setState({
+          windowSize:{
+            width: profile.width / (USER_NUM + 1),
+            height: profile.height / (USER_NUM + 1)
+          }
+        })
+      }
+    })
   }
 
   handleJoin = () => {
@@ -161,10 +201,23 @@ export default class App extends Component {
     rtcEngine.setClientRole(this.state.role)
     rtcEngine.setAudioProfile(0, 1)
     rtcEngine.enableVideo()
-    
+
+    rtcEngine.enableDualStreamMode(true);
+    rtcEngine.setRemoteDefaultVideoStreamType(1);
+
+    rtcEngine.setParameters("{\"che.video.lowBitRateStreamParameter\":{\"width\":210,\"height\":120,\"frameRate\":15,\"bitRate\":200}}")
+
     rtcEngine.enableWebSdkInteroperability(true)
     let encoderProfile = videoProfileList[this.state.encoderConfiguration]
     let rett = rtcEngine.setVideoEncoderConfiguration({width: encoderProfile.width, height: encoderProfile.height, frameRate: encoderProfile.fps, bitrate: encoderProfile.bitrate})
+
+    this.setState({
+      windowSize:{
+        width: encoderProfile.width / 9,
+        height: encoderProfile.height / 9
+      }
+    })
+
     console.log(`setVideoEncoderConfiguration --- ${JSON.stringify(encoderProfile)}  ret: ${rett}`)
 
     let ret1 = rtcEngine.setLocalVoiceChanger(this.state.voiceChangerPreset)
@@ -183,7 +236,7 @@ export default class App extends Component {
       rtcEngine.setAudioPlaybackDevice(this.state.audioDevices[this.state.speaker].deviceid);
     }
 
-    rtcEngine.enableDualStreamMode(true)
+    // rtcEngine.enableDualStreamMode(true)
     rtcEngine.enableAudioVolumeIndication(1000, 3, false)
 
     // rtcEngine.setEncryptionSecret("hello")
@@ -767,12 +820,12 @@ export default class App extends Component {
         </div>
         <div className="column is-three-quarters window-container">
           {this.state.users.map((item, key) => (
-            <Window key={item} uid={item} rtcEngine={this.rtcEngine} role={item===SHARE_ID?'remoteVideoSource':'remote'}></Window>
+            <Window size={this.state.windowSize} key={item} uid={item} rtcEngine={this.rtcEngine} role={item===SHARE_ID?'remoteVideoSource':'remote'}></Window>
           ))}
-          {this.state.local ? (<Window uid={this.state.local} rtcEngine={this.rtcEngine} role="local">
+          {this.state.local ? (<Window size={this.state.windowSize} uid={this.state.local} rtcEngine={this.rtcEngine} role="local">
 
           </Window>) : ''}
-          {this.state.localVideoSource ? (<Window uid={this.state.localVideoSource} rtcEngine={this.rtcEngine} role="localVideoSource">
+          {this.state.localVideoSource ? (<Window size={this.state.windowSize} uid={this.state.localVideoSource} rtcEngine={this.rtcEngine} role="localVideoSource">
 
           </Window>) : ''}
         </div>
@@ -809,7 +862,10 @@ class Window extends Component {
 
   render() {
     return (
-      <div className="window-item">
+      <div className="window-item" style={{
+        width: this.props.size.width + "px",
+        height: this.props.size.height + "px",
+      }}>
         <div className="video-item" id={'video-' + this.props.uid}></div>
 
       </div>

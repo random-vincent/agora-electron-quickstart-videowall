@@ -70,51 +70,27 @@ export const voiceChangerList = [
 export const videoProfileList = [
   {
     value: 0,
-    label: '160x120	15fps	65kbps',
-    width: 160,
-    height: 120,
-    fps: 15,
-    bitrate: 65
-  },
-  {
-    value: 1,
-    label: '320x240	15fps	200kbps',
-    width: 320,
-    height: 240,
-    fps: 15,
-    bitrate: 200
-  },
-  {
-    value: 2,
-    label: '640x360	15fps	400kbps',
-    width: 640,
+    label: '630x360	15fps	400kbps',
+    width: 630,
     height: 360,
     fps: 15,
     bitrate: 400
   },
   {
-    value: 3,
-    label: '640x480	30fps	750kbps',
-    width: 640,
-    height: 480,
-    fps: 30,
-    bitrate: 750
-  },
-  {
-    value: 4,
-    label: '1280x720 15fps 1130kbps',
-    width: 1280,
-    height: 720,
+    value: 1,
+    label: '1230x704	15fps	1000kbps',
+    width: 1230,
+    height: 704,
     fps: 15,
-    bitrate: 1130
+    bitrate: 1000
   },
   {
-    value: 5,
-    label: '1920x1080 15fps 2080kbps',
-    width: 1920,
+    value: 2,
+    label: '1890x1080	15fps	2000kbps',
+    width: 1890,
     height: 1080,
     fps: 15,
-    bitrate: 2080
+    bitrate: 2000
   }
 ]
 

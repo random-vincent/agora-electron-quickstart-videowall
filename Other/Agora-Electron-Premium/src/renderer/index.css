@@ -15,10 +15,10 @@ html, body {
   grid: repeat(2, 50%) / repeat(3, 33%);
 }
 
-.window-item {
-  width: 320;
-  height: 240px;
-}
+/* .window-item {
+  width: 10vw;
+  height: calc(100vw / 9);
+} */
 
 .video-item {
   width: 100%;
