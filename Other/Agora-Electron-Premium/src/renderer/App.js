@@ -891,9 +891,9 @@ class Window extends Component {
         height: this.props.size.height + "px",
       }}>
         <div className="video-item" id={'video-' + this.props.uid}></div>
-        <input type="button" value="Full Screen" onClick={this.fullScreenHandler.bind(this)}/>
+        <input type="button" className='vin-button' value="Full Screen" onClick={this.fullScreenHandler.bind(this)}/>
         {this.state.isFullScreen && (
-          <input className="exit-full-screen-button" 
+          <input className="vin-button exit-full-screen-button" 
             type="button" value="Exit Full Screen" onClick={this.exitFullScreenHandler.bind(this)}/>
         )}
       </div>

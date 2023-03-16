@@ -12,14 +12,21 @@ html, body {
 
 .window-container {
   display: grid!important;
-  grid: repeat(2, 50%) / repeat(3, 33%);
+  grid: repeat(3, 33%) / repeat(4, 25%);
 }
 
 /* .window-item {
   width: 10vw;
   height: calc(100vw / 9);
 } */
-
+.vin-button:hover{
+  cursor: pointer;
+}
+.vin-button{
+  display: inline-block;
+  padding: 2px;
+  margin: 4px;
+}
 .full-screen{
   width: 100vw !important;
   height: 100vh !important; 
