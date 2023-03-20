@@ -399,42 +399,44 @@ export default class App extends Component {
   handleScreenSharing = (e) => {
     // getWindowInfo and open Modal
     let rtcEngine = this.getRtcEngine()
-    let list = rtcEngine.getScreenWindowsInfo();
-    Promise.all(list.map(item => readImage(item.image))).then(imageList => {
-      let windowList = list.map((item, index) => {
-        return {
-          ownerName: item.ownerName,
-          name: item.name,
-          windowId: item.windowId,
-          image: imageList[index],
-        }
+    rtcEngine.getScreenWindowsInfo(list=>{
+      Promise.all(list.map(item => readImage(item.image))).then(imageList => {
+        let windowList = list.map((item, index) => {
+          return {
+            ownerName: item.ownerName,
+            name: item.name,
+            windowId: item.windowId,
+            image: imageList[index],
+          }
+        })
+        this.setState({
+          showWindowPicker: true,
+          windowList: windowList
+        });
       })
-      this.setState({
-        showWindowPicker: true,
-        windowList: windowList
-      });
-    })
+    });
   }
 
   handleDisplaySharing = (e) => {
     // getWindowInfo and open Modal
     let rtcEngine = this.getRtcEngine()
-    let list = rtcEngine.getScreenDisplaysInfo();
-    Promise.all(list.map(item => readImage(item.image))).then(imageList => {
-      let displayList = list.map((item, index) => {
-        let name = `Display ${index + 1}`
-        return {
-          ownerName: "",
-          name: name,
-          displayId: item.displayId,
-          image: imageList[index],
-        }
+    rtcEngine.getScreenDisplaysInfo(list=>{
+      Promise.all(list.map(item => readImage(item.image))).then(imageList => {
+        let displayList = list.map((item, index) => {
+          let name = `Display ${index + 1}`
+          return {
+            ownerName: "",
+            name: name,
+            displayId: item.displayId,
+            image: imageList[index],
+          }
+        })
+        this.setState({
+          showDisplayPicker: true,
+          displayList: displayList
+        });
       })
-      this.setState({
-        showDisplayPicker: true,
-        displayList: displayList
-      });
-    })
+    });
   }
 
   handleRelease = () => {
