@@ -43,7 +43,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
-    "electron": "12.0.0",
+    "electron": "11.0.0",
     "electron-builder": "^22.10.5",
     "electron-webpack": "^2.7.4",
     "webpack": "^4.39.2"
@@ -58,6 +58,6 @@
   },
   "agora_electron": {
     "prebuilt": true,
-    "electron_version": "12.0.0"
+    "electron_version": "11.0.0"
   }
 }
