@@ -254,6 +254,11 @@ export default class App extends Component {
     rtcEngine.joinChannel(this.state.token || null, this.state.channel, '',  Number(`${new Date().getTime()}`.slice(7)))
   }
 
+  switchStreamTypeHandler=(uid,type)=>{
+    let rtcEngine = this.getRtcEngine()
+    rtcEngine.setRemoteVideoStreamType(uid,type)
+  }
+
   handleLeave = () => {
     let rtcEngine = this.getRtcEngine()
     rtcEngine.leaveChannel()
@@ -821,7 +826,9 @@ export default class App extends Component {
         </div>
         <div className="column is-three-quarters window-container">
           {this.state.users.map((item, key) => (
-            <Window size={this.state.windowSize} key={item} uid={item} rtcEngine={this.rtcEngine} role={item===SHARE_ID?'remoteVideoSource':'remote'}></Window>
+            <Window switchRemoteVideoStreamType={(uid,type)=>{
+              this.switchStreamTypeHandler.call(this,uid,type)
+            }} size={this.state.windowSize} key={item} uid={item} rtcEngine={this.rtcEngine} role={item===SHARE_ID?'remoteVideoSource':'remote'}></Window>
           ))}
           {this.state.local ? (<Window size={this.state.windowSize} uid={this.state.local} rtcEngine={this.rtcEngine} role="local">
 
@@ -868,6 +875,8 @@ class Window extends Component {
       return;
     }else{
       wrapper.classList.add("full-screen")
+      console.log("switch to full-screen, steam type 0");
+      this.props.switchRemoteVideoStreamType(this.props.uid, 0)
       this.setState({
         isFullScreen: true
       })
@@ -880,6 +889,8 @@ class Window extends Component {
       return;
     }else{
       wrapper.classList.remove("full-screen")
+      console.log("switch to full-screen, steam type 1");
+      this.props.switchRemoteVideoStreamType(this.props.uid, 1)
       this.setState({
         isFullScreen: false
       })
