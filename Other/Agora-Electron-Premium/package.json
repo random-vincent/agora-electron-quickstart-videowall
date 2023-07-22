@@ -58,6 +58,8 @@
   },
   "agora_electron": {
     "prebuilt": true,
-    "electron_version": "11.0.0"
+    "electron_version": "11.0.0",
+    "platform": "win32",
+    "arch": "x64"
   }
 }
