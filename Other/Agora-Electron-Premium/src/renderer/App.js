@@ -6,8 +6,8 @@ import os from 'os'
 
 import desktopCapturer from 'electron'
 
-import {voiceChangerList, voiceReverbPreset, videoProfileList, audioProfileList, audioScenarioList, SHARE_ID, RTMP_URL, voiceReverbList } from '../utils/settings'
-import {readImage} from '../utils/base64'
+import { voiceChangerList, voiceReverbPreset, videoProfileList, audioProfileList, audioScenarioList, SHARE_ID, RTMP_URL, voiceReverbList } from '../utils/settings'
+import { readImage } from '../utils/base64'
 import WindowPicker from './components/WindowPicker/index.js'
 import DisplayPicker from './components/DisplayPicker/index.js'
 
@@ -49,11 +49,11 @@ export default class App extends Component {
   }
 
   getRtcEngine() {
-    if(!this.state.appid){
+    if (!this.state.appid) {
       alert("Please enter appid")
       return
     }
-    if(!this.rtcEngine) {
+    if (!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine()
       this.rtcEngine.initialize(this.state.appid)
       let ret = this.rtcEngine.setLogFileSize(2000)
@@ -68,7 +68,7 @@ export default class App extends Component {
         audioPlaybackDevices: rtcEngine.getAudioPlaybackDevices(),
       })
     }
-  
+
     return this.rtcEngine
   }
 
@@ -116,6 +116,9 @@ export default class App extends Component {
         audioPlaybackDevices: rtcEngine.getAudioPlaybackDevices()
       })
     })
+    rtcEngine.on("remoteVideoStats", stats => {
+      console.log("remote stats", stats);
+    })
     rtcEngine.on('videodevicestatechanged', () => {
       this.setState({
         videoDevices: rtcEngine.getVideoDevices()
@@ -150,7 +153,7 @@ export default class App extends Component {
   }
 
   handleJoin = () => {
-    if(!this.state.channel){
+    if (!this.state.channel) {
       alert("Please enter channel")
       return
     }
@@ -161,10 +164,10 @@ export default class App extends Component {
     rtcEngine.setClientRole(this.state.role)
     rtcEngine.setAudioProfile(0, 1)
     rtcEngine.enableVideo()
-    
+
     rtcEngine.enableWebSdkInteroperability(true)
     let encoderProfile = videoProfileList[this.state.encoderConfiguration]
-    let rett = rtcEngine.setVideoEncoderConfiguration({width: encoderProfile.width, height: encoderProfile.height, frameRate: encoderProfile.fps, bitrate: encoderProfile.bitrate})
+    let rett = rtcEngine.setVideoEncoderConfiguration({ width: encoderProfile.width, height: encoderProfile.height, frameRate: encoderProfile.fps, bitrate: encoderProfile.bitrate })
     console.log(`setVideoEncoderConfiguration --- ${JSON.stringify(encoderProfile)}  ret: ${rett}`)
 
     let ret1 = rtcEngine.setLocalVoiceChanger(this.state.voiceChangerPreset)
@@ -173,13 +176,13 @@ export default class App extends Component {
     let ret2 = rtcEngine.setLocalVoiceReverbPreset(this.state.voiceReverbPreset)
     console.log(`setLocalVoiceReverbPreset : ${ret2} -- e ${this.state.voiceReverbPreset}`)
 
-    if(this.state.videoDevices.length > 0) {
+    if (this.state.videoDevices.length > 0) {
       rtcEngine.setVideoDevice(this.state.videoDevices[this.state.camera].deviceid)
     }
-    if(this.state.audioDevices.length > 0) {
+    if (this.state.audioDevices.length > 0) {
       rtcEngine.setAudioRecordingDevice(this.state.audioDevices[this.state.mic].deviceid);
     }
-    if(this.state.audioPlaybackDevices.length > 0) {
+    if (this.state.audioPlaybackDevices.length > 0) {
       rtcEngine.setAudioPlaybackDevice(this.state.audioDevices[this.state.speaker].deviceid);
     }
 
@@ -188,9 +191,9 @@ export default class App extends Component {
 
     // rtcEngine.setEncryptionSecret("hello")
     // rtcEngine.setEncryptionMode("aes-128-xts")
-    
+
     // rtcEngine.enableEncryption(true, {encryptionMode: 1, encryptionKey: "hello"})
-    
+
     //enable beauty options
     // rtcEngine.setBeautyEffectOptions(true, {
     //   lighteningContrastLevel: 2,
@@ -199,7 +202,7 @@ export default class App extends Component {
     //   rednessLevel: 0
     // })
     rtcEngine.setRenderMode(1)
-    rtcEngine.joinChannel(this.state.token || null, this.state.channel, '',  Number(`${new Date().getTime()}`.slice(7)))
+    rtcEngine.joinChannel(this.state.token || null, this.state.channel, '', Number(`${new Date().getTime()}`.slice(7)))
   }
 
   handleLeave = () => {
@@ -209,17 +212,17 @@ export default class App extends Component {
   }
 
   handleCameraChange = e => {
-    this.setState({camera: e.currentTarget.value});
+    this.setState({ camera: e.currentTarget.value });
     this.getRtcEngine().setVideoDevice(this.state.videoDevices[e.currentTarget.value].deviceid);
   }
 
   handleMicChange = e => {
-    this.setState({mic: e.currentTarget.value});
+    this.setState({ mic: e.currentTarget.value });
     this.getRtcEngine().setAudioRecordingDevice(this.state.audioDevices[e.currentTarget.value].deviceid);
   }
 
   handleSpeakerChange = e => {
-    this.setState({speaker: e.currentTarget.value});
+    this.setState({ speaker: e.currentTarget.value });
     this.getRtcEngine().setAudioPlaybackDevice(this.state.audioPlaybackDevices[e.currentTarget.value].deviceid);
   }
 
@@ -245,15 +248,15 @@ export default class App extends Component {
     })
   }
 
-    /**
-   * prepare screen share: initialize and join
-   * @param {string} token 
-   * @param {string} info 
-   * @param {number} timeout 
-   */
+  /**
+ * prepare screen share: initialize and join
+ * @param {string} token 
+ * @param {string} info 
+ * @param {number} timeout 
+ */
   prepareScreenShare(token = null, info = '', timeout = 30000) {
     return new Promise((resolve, reject) => {
-      if(this.sharingPrepared){
+      if (this.sharingPrepared) {
         return resolve(this.state.localVideoSource)
       }
       let timer = setTimeout(() => {
@@ -267,7 +270,7 @@ export default class App extends Component {
         console.log(`videosourcejoinedsuccess`)
       });
 
-      rtcEngine.once('videoSourceLeaveChannel', ()=>{
+      rtcEngine.once('videoSourceLeaveChannel', () => {
         console.log(`videoSourceLeaveChannel`)
         rtcEngine.videoSourceRelease()
       })
@@ -282,29 +285,29 @@ export default class App extends Component {
 
         // rtcEngine.videoSourceSetEncryptionSecret("hello")
         // rtcEngine.videoSourceSetEncryptionMode("aes-128-xts")
-        
+
         // rtcEngine.videoSourceEnableEncryption(true, {encryptionMode: 1, encryptionKey: "hello"});
         rtcEngine.videoSourceJoin(token, this.state.channel, info, SHARE_ID);
-      } catch(err) {
+      } catch (err) {
         clearTimeout(timer)
         reject(err)
       }
     })
   }
 
-    /**
-   * start screen share
-   * @param {*} windowId windows id to capture
-   * @param {*} captureFreq fps of video source screencapture, 1 - 15
-   * @param {*} rect null/if specified, {x: 0, y: 0, width: 0, height: 0}
-   * @param {*} bitrate bitrate of video source screencapture
-   */
-  startScreenShare(windowId=0, captureFreq=15, 
-    rect={
+  /**
+ * start screen share
+ * @param {*} windowId windows id to capture
+ * @param {*} captureFreq fps of video source screencapture, 1 - 15
+ * @param {*} rect null/if specified, {x: 0, y: 0, width: 0, height: 0}
+ * @param {*} bitrate bitrate of video source screencapture
+ */
+  startScreenShare(windowId = 0, captureFreq = 15,
+    rect = {
       top: 0, left: 0, right: 0, bottom: 0
-    }, bitrate=0
+    }, bitrate = 0
   ) {
-    if(!this.sharingPrepared) {
+    if (!this.sharingPrepared) {
       console.error('Sharing not prepared yet.')
       return false
     };
@@ -314,14 +317,14 @@ export default class App extends Component {
       // there's a known limitation that, videosourcesetvideoprofile has to be called at least once
       // note although it's called, it's not taking any effect, to control the screenshare dimension, use captureParam instead
       rtcEngine.videoSourceSetVideoProfile(43, false);
-      rtcEngine.videoSourceStartScreenCaptureByWindow(windowId, {x: 0, y: 0, width: 0, height: 0}, {width: 0, height: 0, bitrate: 500, frameRate: 15, captureMouseCursor: false, windowFocus: false})
+      rtcEngine.videoSourceStartScreenCaptureByWindow(windowId, { x: 0, y: 0, width: 0, height: 0 }, { width: 0, height: 0, bitrate: 500, frameRate: 15, captureMouseCursor: false, windowFocus: false })
       rtcEngine.startScreenCapturePreview();
     });
   }
 
 
   startScreenShareByDisplay(displayId) {
-    if(!this.sharingPrepared) {
+    if (!this.sharingPrepared) {
       console.error('Sharing not prepared yet.')
       return false
     };
@@ -338,8 +341,8 @@ export default class App extends Component {
       // });
       // let excludeList = excludeListFull;
       let excludeList = []
-      
-      rtcEngine.videoSourceStartScreenCaptureByScreen(displayId, {x: 0, y: 0, width: 0, height: 0}, {width: 0, height: 0, bitrate: 500, frameRate: 5, captureMouseCursor: false, windowFocus: false, excludeWindowList: excludeList, excludeWindowCount: excludeList.length});
+
+      rtcEngine.videoSourceStartScreenCaptureByScreen(displayId, { x: 0, y: 0, width: 0, height: 0 }, { width: 0, height: 0, bitrate: 500, frameRate: 5, captureMouseCursor: false, windowFocus: false, excludeWindowList: excludeList, excludeWindowCount: excludeList.length });
       rtcEngine.startScreenCapturePreview();
     });
   }
@@ -392,7 +395,7 @@ export default class App extends Component {
       localSharing: false,
       local: ''
     })
-    if(this.rtcEngine) {
+    if (this.rtcEngine) {
       this.sharingPrepared = false
       this.rtcEngine.release();
       this.rtcEngine = null;
@@ -401,11 +404,11 @@ export default class App extends Component {
 
   handleRtmp = () => {
     const url = RTMP_URL
-    if(!url) {
+    if (!url) {
       alert("RTMP URL Empty")
       return
     }
-    if(!this.state.rtmpTestOn) {
+    if (!this.state.rtmpTestOn) {
       let ret = this.rtcEngine.setLiveTranscoding({
         /** width of canvas */
         width: 480,
@@ -438,7 +441,7 @@ export default class App extends Component {
         audioBitrate: 48,
         transcodingExtraInfo: "",
         /** transcodingusers array */
-       transcodingUsers: [
+        transcodingUsers: [
           {
             uid: this.state.local,
             x: 0,
@@ -453,14 +456,14 @@ export default class App extends Component {
         watermark: {
           url: "https://winaero.com/blog/wp-content/uploads/2019/11/Photos-new-icon.png",
           x: 0,
-          y:0,
+          y: 0,
           width: 50,
           height: 50
         },
         background: {
           url: "https://winaero.com/blog/wp-content/uploads/2019/11/Photos-new-icon.png",
           x: 0,
-          y:0,
+          y: 0,
           width: 50,
           height: 50
         }
@@ -473,7 +476,7 @@ export default class App extends Component {
     } else {
       this.rtcEngine.removePublishStreamUrl(url)
     }
-    
+
     this.setState({
       rtmpTestOn: !this.state.rtmpTestOn
     })
@@ -585,7 +588,7 @@ export default class App extends Component {
     if (this.state.showWindowPicker) {
       windowPicker = <WindowPicker
         onSubmit={this.handleWindowPicker}
-        onCancel={e => this.setState({showWindowPicker: false})}
+        onCancel={e => this.setState({ showWindowPicker: false })}
         windowList={this.state.windowList}
       />
     }
@@ -593,40 +596,40 @@ export default class App extends Component {
     if (this.state.showDisplayPicker) {
       displayPicker = <DisplayPicker
         onSubmit={this.handleDisplayPicker}
-        onCancel={e => this.setState({showWindowPicker: false})}
+        onCancel={e => this.setState({ showWindowPicker: false })}
         displayList={this.state.displayList}
       />
     }
 
 
     return (
-      <div className="columns" style={{padding: "20px", height: '100%', margin: '0'}}>
-        { this.state.showWindowPicker ? windowPicker : '' }
-        { this.state.showDisplayPicker ? displayPicker : '' }
-        <div className="column is-one-quarter" style={{overflowY: 'auto'}}>
+      <div className="columns" style={{ padding: "20px", height: '100%', margin: '0' }}>
+        {this.state.showWindowPicker ? windowPicker : ''}
+        {this.state.showDisplayPicker ? displayPicker : ''}
+        <div className="column is-one-quarter" style={{ overflowY: 'auto' }}>
           <div className="field">
             <label className="label">App ID</label>
             <div className="control">
-              <input onChange={e => this.setState({appid: e.currentTarget.value})} value={this.state.appid} className="input" type="text" placeholder="APP ID" />
+              <input onChange={e => this.setState({ appid: e.currentTarget.value })} value={this.state.appid} className="input" type="text" placeholder="APP ID" />
             </div>
           </div>
           <div className="field">
             <label className="label">Token(Optional)</label>
             <div className="control">
-              <input onChange={e => this.setState({token: e.currentTarget.value})} value={this.state.token} className="input" type="text" placeholder="Token(Leave it empty if you didn't enable it)" />
+              <input onChange={e => this.setState({ token: e.currentTarget.value })} value={this.state.token} className="input" type="text" placeholder="Token(Leave it empty if you didn't enable it)" />
             </div>
           </div>
           <div className="field">
             <label className="label">Channel</label>
             <div className="control">
-              <input onChange={e => this.setState({channel: e.currentTarget.value})} value={this.state.channel} className="input" type="text" placeholder="Input a channel name" />
+              <input onChange={e => this.setState({ channel: e.currentTarget.value })} value={this.state.channel} className="input" type="text" placeholder="Input a channel name" />
             </div>
           </div>
           <div className="field">
             <label className="label">Role</label>
             <div className="control">
-              <div className="select"  style={{width: '100%'}}>
-                <select onChange={e => this.setState({role: Number(e.currentTarget.value)})} value={this.state.role} style={{width: '100%'}}>
+              <div className="select" style={{ width: '100%' }}>
+                <select onChange={e => this.setState({ role: Number(e.currentTarget.value) })} value={this.state.role} style={{ width: '100%' }}>
                   <option value={1}>Anchor</option>
                   <option value={2}>Audience</option>
                 </select>
@@ -636,8 +639,8 @@ export default class App extends Component {
           <div className="field">
             <label className="label">VoiceChanger</label>
             <div className="control">
-              <div className="select"  style={{width: '100%'}}>
-                <select onChange={this.handleVoiceChanger} value={this.state.voiceChangerPreset} style={{width: '100%'}}>
+              <div className="select" style={{ width: '100%' }}>
+                <select onChange={this.handleVoiceChanger} value={this.state.voiceChangerPreset} style={{ width: '100%' }}>
                   {voiceChangerList.map(item => (<option key={item.value} value={item.value}>{item.label}</option>))}
                 </select>
               </div>
@@ -646,8 +649,8 @@ export default class App extends Component {
           <div className="field">
             <label className="label">VoiceReverbPreset</label>
             <div className="control">
-              <div className="select"  style={{width: '100%'}}>
-                <select onChange={this.handleVoiceReverbPreset} value={this.state.voiceReverbPreset} style={{width: '100%'}}>
+              <div className="select" style={{ width: '100%' }}>
+                <select onChange={this.handleVoiceReverbPreset} value={this.state.voiceReverbPreset} style={{ width: '100%' }}>
                   {voiceReverbList.map(item => (<option key={item.value} value={item.value}>{item.label}</option>))}
                 </select>
               </div>
@@ -656,8 +659,8 @@ export default class App extends Component {
           <div className="field">
             <label className="label">Video Encoder</label>
             <div className="control">
-              <div className="select"  style={{width: '100%'}}>
-                <select onChange={this.handleEncoderConfiguration} value={this.state.encoderConfiguration} style={{width: '100%'}}>
+              <div className="select" style={{ width: '100%' }}>
+                <select onChange={this.handleEncoderConfiguration} value={this.state.encoderConfiguration} style={{ width: '100%' }}>
                   {videoProfileList.map(item => (<option key={item.value} value={item.value}>{item.label}</option>))}
                 </select>
               </div>
@@ -666,13 +669,13 @@ export default class App extends Component {
           <div className="field">
             <label className="label">AudioProfile</label>
             <div className="control">
-              <div className="select"  style={{width: '50%'}}>
-                <select onChange={this.handleAudioProfile} value={this.state.audioProfile} style={{width: '100%'}}>
+              <div className="select" style={{ width: '50%' }}>
+                <select onChange={this.handleAudioProfile} value={this.state.audioProfile} style={{ width: '100%' }}>
                   {audioProfileList.map(item => (<option key={item.value} value={item.value}>{item.label}</option>))}
                 </select>
               </div>
-              <div className="select"  style={{width: '50%'}}>
-                <select onChange={this.handleAudioScenario} value={this.state.audioScenario} style={{width: '100%'}}>
+              <div className="select" style={{ width: '50%' }}>
+                <select onChange={this.handleAudioScenario} value={this.state.audioScenario} style={{ width: '100%' }}>
                   {audioScenarioList.map(item => (<option key={item.value} value={item.value}>{item.label}</option>))}
                 </select>
               </div>
@@ -681,8 +684,8 @@ export default class App extends Component {
           <div className="field">
             <label className="label">Camera</label>
             <div className="control">
-              <div className="select"  style={{width: '100%'}}>
-                <select onChange={this.handleCameraChange} value={this.state.camera} style={{width: '100%'}}>
+              <div className="select" style={{ width: '100%' }}>
+                <select onChange={this.handleCameraChange} value={this.state.camera} style={{ width: '100%' }}>
                   {this.state.videoDevices.map((item, index) => (<option key={index} value={index}>{item.devicename}</option>))}
                 </select>
               </div>
@@ -691,8 +694,8 @@ export default class App extends Component {
           <div className="field">
             <label className="label">Microphone</label>
             <div className="control">
-              <div className="select"  style={{width: '100%'}}>
-                <select onChange={this.handleMicChange} value={this.state.mic} style={{width: '100%'}}>
+              <div className="select" style={{ width: '100%' }}>
+                <select onChange={this.handleMicChange} value={this.state.mic} style={{ width: '100%' }}>
                   {this.state.audioDevices.map((item, index) => (<option key={index} value={index}>{item.devicename}</option>))}
                 </select>
               </div>
@@ -701,8 +704,8 @@ export default class App extends Component {
           <div className="field">
             <label className="label">Loudspeaker</label>
             <div className="control">
-              <div className="select"  style={{width: '100%'}}>
-                <select onChange={this.handleSpeakerChange} value={this.state.speaker} style={{width: '100%'}}>
+              <div className="select" style={{ width: '100%' }}>
+                <select onChange={this.handleSpeakerChange} value={this.state.speaker} style={{ width: '100%' }}>
                   {this.state.audioPlaybackDevices.map((item, index) => (<option key={index} value={index}>{item.devicename}</option>))}
                 </select>
               </div>
@@ -721,7 +724,7 @@ export default class App extends Component {
               <button onClick={this.handleJoin} className="button is-link">Join</button>
             </div>
           </div>
-          <hr/>
+          <hr />
           <div className="field">
             <label className="label">Network Test</label>
             <div className="control">
@@ -767,7 +770,7 @@ export default class App extends Component {
         </div>
         <div className="column is-three-quarters window-container">
           {this.state.users.map((item, key) => (
-            <Window key={item} uid={item} rtcEngine={this.rtcEngine} role={item===SHARE_ID?'remoteVideoSource':'remote'}></Window>
+            <Window key={item} uid={item} rtcEngine={this.rtcEngine} role={item === SHARE_ID ? 'remoteVideoSource' : 'remote'}></Window>
           ))}
           {this.state.local ? (<Window uid={this.state.local} rtcEngine={this.rtcEngine} role="local">
 
